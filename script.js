@@ -28,15 +28,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Fetch all Pokémon data
-    function fetchAllPokemon(types) {
-        const promises = types.map(type => fetch(type.url).then(response => response.json()));
-        Promise.all(promises)
-            .then(results => {
-                allPokemon = results.flatMap(result => result.pokemon.map(p => p.pokemon));
-                displayPokemon(allPokemon);
-            })
-            .catch(error => console.error('Error fetching Pokémon data:', error));
-    }
+// Fetch all Pokémon data
+function fetchAllPokemon(types) {
+    const promises = types.map(type => fetch(type.url).then(response => response.json()));
+    Promise.all(promises)
+        .then(results => {
+            const uniquePokemon = new Map();
+            results.forEach(result => {
+                result.pokemon.forEach(p => uniquePokemon.set(p.pokemon.name, p.pokemon));
+            });
+            allPokemon = Array.from(uniquePokemon.values());
+            // Sort Pokémon by hash IDs
+            allPokemon.sort((a, b) => parseInt(a.url.split('/').slice(-2)[0]) - parseInt(b.url.split('/').slice(-2)[0]));
+            displayPokemon(allPokemon);
+        })
+        .catch(error => console.error('Error fetching Pokémon data:', error));
+}
 
     // Display Pokémon cards
     function displayPokemon(pokemonList) {
